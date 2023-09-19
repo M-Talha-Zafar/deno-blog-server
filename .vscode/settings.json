@@ -20,6 +20,6 @@
   },
   "peacock.color": "#1A1B1C",
   "deno.enable": true,
-  "deno.lint": true,
-  "deno.unstable": true
+  "deno.lint": false,
+  "deno.unstable": false
 }

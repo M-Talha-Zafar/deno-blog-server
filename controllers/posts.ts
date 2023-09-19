@@ -1,36 +1,53 @@
+import Post from "../models/post.ts";
+import { Context } from "https://deno.land/x/oak@v12.6.1/mod.ts";
+
 interface Post {
   id: number;
   title: string;
   body: string;
 }
 
-let posts: Post[] = [];
-
 const PostsController = {
-  getAllPosts: (ctx) => {
+  getAllPosts: (ctx: Context) => {
     ctx.response.body = { posts };
   },
 
-  createPost: (ctx) => {
-    const { title, body } = ctx.request.body;
-    const newPost: Post = {
-      id: posts.length + 1,
-      title,
-      body,
-    };
+  createPost: async (ctx: Context) => {
+    const data = await ctx.request.body().value;
+
+    const newPost = await Post.insertOne({
+      title: data.title,
+      body: data.body,
+    });
+
+    ctx.response.body = { message: "Post created successfully!", newPost };
   },
 
-  updatePost: async (ctx) => {
-    const data = await ctx.request.body();
+  updatePost: async (ctx: Context) => {
+    const data = await ctx.request.body().value;
     const { title, body } = data;
     const { id } = ctx.params;
 
-    const post = posts.find((p) => p.id === parseInt(id));
+    const updatedPost: Post = {
+      id: parseInt(id),
+      title,
+      body,
+    };
+
+    posts = posts.map((p) => (p.id === parseInt(id) ? updatedPost : p));
+    ctx.response.body = { message: "Post updated successfully!", updatedPost };
   },
 
-  deletePost: (ctx) => {
+  deletePost: (ctx: Context) => {
     const { id } = ctx.params;
-    const post = posts.find((p) => p.id === parseInt(id));
+    const deletedPost = posts.find((p) => p.id === parseInt(id));
+    if (!deletedPost) {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Post not found!" };
+      return;
+    }
+    posts = posts.filter((p) => p.id === deletedPost.id);
+    ctx.response.body = { message: "Post deleted successfully!", deletedPost };
   },
 };
 

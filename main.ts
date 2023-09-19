@@ -1,5 +1,8 @@
-import { Application } from "https://deno.land/x/oak/mod.ts";
+import { Application } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import postsRoutes from "./routes/posts.ts";
+import connectToMongo from "./helpers/db.ts";
+
+connectToMongo();
 
 const app = new Application();
 
